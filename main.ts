@@ -7,7 +7,7 @@ const geoLocationFromIp = createGeoLocationFromIp(Deno.env.get("MAXMIND_KEY")!);
 await Deno.serve(
   { port: 1001 },
   router({
-    "/lookup{/}?": async (req: Request) => {
+    "POST@/lookup{/}?": async (req: Request) => {
       const { latitude, longitude } = await req.json();
       return new Response(
         JSON.stringify({
@@ -17,7 +17,7 @@ await Deno.serve(
         })
       );
     },
-    "/ip{/}?": async (req: Request) => {
+    "POST@/ip{/}?": async (req: Request) => {
       const { ip } = await req.json();
       return new Response(
         JSON.stringify({
