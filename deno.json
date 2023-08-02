@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "start": "deno run -A --unstable --watch main.ts"
+  },
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns"]
+  },
+  "imports": {
+    "ip_location": "./deps/ip_location/mod.ts",
+    "ip_location/": "./deps/ip_location/",
+    "rutt": "https://deno.land/x/rutt@0.1.0/mod.ts"
+  }
+}
