@@ -8,6 +8,8 @@
   "imports": {
     "ip_location": "./deps/ip_location/mod.ts",
     "ip_location/": "./deps/ip_location/",
-    "rutt": "https://deno.land/x/rutt@0.1.0/mod.ts"
+    "rutt": "https://deno.land/x/rutt@0.2.0/mod.ts",
+    "s3_lite_client": "https://deno.land/x/s3_lite_client@0.6.1/mod.ts",
+    "std/": "https://deno.land/std@0.202.0/"
   }
 }

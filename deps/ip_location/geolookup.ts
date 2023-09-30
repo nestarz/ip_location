@@ -21,8 +21,11 @@ const points = turfHelpers.featureCollection(
   values.map((point) => turfHelpers.point([point[3], point[4]]))
 );
 
-export default (longitude: number, latitude: number): GeoNamePoint | null => {
-  const idx = turfNearestPoint(turfHelpers.point([longitude, latitude]), points)
-    ?.properties?.featureIndex;
-  return idx ? values[idx] : null;
-};
+export default () =>
+  (longitude: number, latitude: number): GeoNamePoint | null => {
+    const idx = turfNearestPoint(
+      turfHelpers.point([longitude, latitude]),
+      points
+    )?.properties?.featureIndex;
+    return idx ? values[idx] : null;
+  };

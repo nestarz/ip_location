@@ -10,9 +10,7 @@ import {
 import { Maxmind } from "https://deno.land/x/maxminddb@v1.2.0/mod.ts";
 import cities500 from "./cities500.json" assert { type: "json" };
 import type { GeoNamePoint } from "./geolookup.ts";
-import { createKv, streamToArrayBuffer } from "./utils/kv.ts";
-
-const kv = createKv("maxmind");
+import type { S3Client } from "https://deno.land/x/s3_lite_client@0.6.1/mod.ts";
 
 async function gen2array<T>(gen: AsyncIterable<T>): Promise<T[]> {
   const out: T[] = [];
@@ -39,11 +37,13 @@ const getFromTar = async (
       return merge(await gen2array(iterateReader(entry)));
 };
 
-const createDatabase = async (key: string) => {
-  const cacheStream = await kv?.getFile("maxmind.bin");
+const createDatabase = async (s3Client: S3Client, key: string) => {
+  const cacheStream = await s3Client
+    ?.getObject("maxmind.bin")
+    .then((r) => r.arrayBuffer());
   if (cacheStream) {
     console.log("[maxmind] use cache database");
-    return new Maxmind(new Uint8Array(await streamToArrayBuffer(cacheStream)));
+    return new Maxmind(new Uint8Array(cacheStream));
   }
   const url = `https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=${key}&suffix=tar.gz`;
   const res = await fetch(url);
@@ -53,32 +53,40 @@ const createDatabase = async (key: string) => {
     .pipeThrough(new DecompressionStream("gzip"))
     .getReader();
   const bytes = await getFromTar(streamReader);
-  await kv?.saveFile("maxmind.bin", bytes);
+  if (!bytes) return null;
+  await s3Client.putObject("maxmind.bin", bytes);
   return new Maxmind(bytes);
 };
 
 let dbPromise;
-export default (maxMindKey: string) => async (ip: string) => {
-  if (ip === "127.0.0.1") return null;
-  try {
-    console.time("[maxmind] create database");
-    dbPromise ??= createDatabase(maxMindKey);
-    const db = await dbPromise;
-    console.timeEnd("[maxmind] create database");
-    console.log(ip);
-    const geoname_id: string = db.lookup_city(ip)?.city.geoname_id.toString();
-    const point = (cities500 as any)[geoname_id] as GeoNamePoint;
-    return point
-      ? {
-          city_name: point[0] as string,
-          country_code: point[1] as string,
-          region_code: point[2] as string,
-          latitude: point[3] as unknown as number,
-          longitude: point[4] as unknown as number,
-        }
-      : null;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
+export default ({
+    maxmindKey,
+    s3Client,
+  }: {
+    maxmindKey: string;
+    s3Client: S3Client;
+  }) =>
+  async (ip: string) => {
+    if (ip === "127.0.0.1") return null;
+    try {
+      console.time("[maxmind] create database");
+      dbPromise ??= createDatabase(s3Client, maxmindKey);
+      const db = await dbPromise;
+      console.timeEnd("[maxmind] create database");
+      console.log(ip);
+      const geoname_id: string = db.lookup_city(ip)?.city.geoname_id.toString();
+      const point = (cities500 as any)[geoname_id] as GeoNamePoint;
+      return point
+        ? {
+            city_name: point[0] as string,
+            country_code: point[1] as string,
+            region_code: point[2] as string,
+            latitude: point[3] as unknown as number,
+            longitude: point[4] as unknown as number,
+          }
+        : null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
