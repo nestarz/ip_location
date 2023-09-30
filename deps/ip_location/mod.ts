@@ -40,7 +40,8 @@ const getFromTar = async (
 const createDatabase = async (s3Client: S3Client, key: string) => {
   const cacheStream = await s3Client
     ?.getObject("maxmind.bin")
-    .then((r) => r.arrayBuffer());
+    .then((r) => r.arrayBuffer())
+    .catch(() => null);
   if (cacheStream) {
     console.log("[maxmind] use cache database");
     return new Maxmind(new Uint8Array(cacheStream));
