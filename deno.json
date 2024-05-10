@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "start": "deno run -A --unstable --watch main.ts"
+    "start": "deno run -A --unstable --watch --env main.ts"
   },
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns"]

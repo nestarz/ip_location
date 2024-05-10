@@ -1,4 +1,3 @@
-import "std/dotenv/load.ts";
 import { router } from "rutt";
 import createGeoLocationFromIp from "ip_location";
 import createGeoLookup from "ip_location/geolookup.ts";
@@ -20,6 +19,8 @@ const geoLocationFromIp = createGeoLocationFromIp({
   s3Client,
 });
 
+const map = { "91.172.211.149": "37.65.173.13" };
+
 await Deno.serve(
   { port: 1001 },
   router({
@@ -30,16 +31,18 @@ await Deno.serve(
           data: [latitude, longitude].every((d) => typeof d === "number")
             ? await geoLookup(latitude, longitude)
             : undefined,
-        })
+        }),
       );
     },
     "POST@/ip{/}?": async (req: Request) => {
       const { ip } = await req.json();
+      const ipOrfakeIp = ip in map ? map[ip as keyof typeof map] : ip;
+      if (ip !== ipOrfakeIp) console.warn("using fake ip for", ip, ipOrfakeIp);
       return new Response(
         JSON.stringify({
-          data: await geoLocationFromIp(ip),
-        })
+          data: await geoLocationFromIp(ipOrfakeIp),
+        }),
       );
     },
-  })
+  }),
 ).finished;
