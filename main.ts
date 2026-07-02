@@ -21,28 +21,30 @@ const geoLocationFromIp = createGeoLocationFromIp({
 
 const map = { "91.172.211.149": "37.65.173.13" };
 
-await Deno.serve(
-  { port: Number(Deno.env.get("PORT") ?? 8000) },
-  router({
-    "POST@/lookup{/}?": async (req: Request) => {
-      const { latitude, longitude } = await req.json();
-      return new Response(
-        JSON.stringify({
-          data: [latitude, longitude].every((d) => typeof d === "number")
-            ? await geoLookup(latitude, longitude)
-            : undefined,
-        }),
-      );
-    },
-    "POST@/ip{/}?": async (req: Request) => {
-      const { ip } = await req.json();
-      const ipOrfakeIp = ip in map ? map[ip as keyof typeof map] : ip;
-      if (ip !== ipOrfakeIp) console.warn("using fake ip for", ip, ipOrfakeIp);
-      return new Response(
-        JSON.stringify({
-          data: await geoLocationFromIp(ipOrfakeIp),
-        }),
-      );
-    },
-  }),
-).finished;
+const mainHandler = router({
+  "POST@/lookup{/}?": async (req: Request) => {
+    const { latitude, longitude } = await req.json();
+    return new Response(
+      JSON.stringify({
+        data: [latitude, longitude].every((d) => typeof d === "number")
+          ? await geoLookup(latitude, longitude)
+          : undefined,
+      }),
+    );
+  },
+  "POST@/ip{/}?": async (req: Request) => {
+    const { ip } = await req.json();
+    const ipOrfakeIp = ip in map ? map[ip as keyof typeof map] : ip;
+    if (ip !== ipOrfakeIp) console.warn("using fake ip for", ip, ipOrfakeIp);
+    return new Response(
+      JSON.stringify({
+        data: await geoLocationFromIp(ipOrfakeIp),
+      }),
+    );
+  },
+});
+
+const fetch = (req: Request) => mainHandler(req);
+
+export { fetch };
+export default { fetch };
