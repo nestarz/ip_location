@@ -2,6 +2,13 @@
   "tasks": {
     "start": "deno run -A --unstable --watch --env main.ts"
   },
+  "deploy": {
+    "org": "luckylab-prod",
+    "app": "ip-location",
+    "runtime": {
+      "entrypoint": "main.ts"
+    }
+  },
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns"]
   },
