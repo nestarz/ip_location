@@ -1,6 +1,6 @@
 import * as turfHelpers from "https://esm.sh/@turf/helpers@6.5.0";
 import turfNearestPoint from "https://esm.sh/@turf/nearest-point@6.5.0";
-import cities500 from "./cities500.json" assert { type: "json" };
+import cities500 from "./cities500.json" with { type: "json" };
 
 type GeoNameId = "number";
 type CityName = "string";

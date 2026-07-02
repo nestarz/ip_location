@@ -8,7 +8,7 @@ import {
   iterateReader,
 } from "https://deno.land/std@0.190.0/streams/mod.ts";
 import { Maxmind } from "https://deno.land/x/maxminddb@v1.2.0/mod.ts";
-import cities500 from "./cities500.json" assert { type: "json" };
+import cities500 from "./cities500.json" with { type: "json" };
 import type { GeoNamePoint } from "./geolookup.ts";
 import type { S3Client } from "https://deno.land/x/s3_lite_client@0.6.1/mod.ts";
 
