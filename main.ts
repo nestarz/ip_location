@@ -22,7 +22,7 @@ const geoLocationFromIp = createGeoLocationFromIp({
 const map = { "91.172.211.149": "37.65.173.13" };
 
 await Deno.serve(
-  { port: 1001 },
+  { port: Number(Deno.env.get("PORT") ?? 8000) },
   router({
     "POST@/lookup{/}?": async (req: Request) => {
       const { latitude, longitude } = await req.json();
