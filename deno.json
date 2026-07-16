@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "start": "deno run -A --unstable --watch --env main.ts"
+    "start": "deno serve -A --watch --env main.ts"
   },
   "deploy": {
     "org": "luckylab-prod",
